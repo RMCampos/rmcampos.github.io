@@ -1,16 +1,19 @@
-About
-======
+# rmcampos.github.io
 
-This repo contains my updated CV. Just static files. You can clone and modify as much as you want. You can see this exactly version in action here: https://cv.ricardocampos.blog
+[Resume] This repository contains my full resume, skills, work history and more.
 
-Info
-====
-- HTML5
-- CSS3
-- Javascript and JQuery
-- You can test with ws (npm install local-web-server) or another local server of your choice.
+# Tech stack
+- [ ] Back-end
+- [x] Front-end
+- [ ] Docker
+- [ ] Database related
+- [ ] Testing
+- [ ] Maven
+- [ ] NPM
+- [ ] Java related
+- [x] JavaScript/TypeScript/React related
+- [ ] Shell scripting
 
-Credits
-=======
+# Credits
 
 - Forked from https://github.com/StartBootstrap/startbootstrap-resume
