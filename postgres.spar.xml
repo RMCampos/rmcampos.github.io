@@ -1,0 +1,1076 @@
+<?xml version="1.0" encoding="UTF-8"?><database name="postgres" schema="spar" type="PostgreSQL - 13.8 (Debian 13.8-1.pgdg110+1)">
+   <sequences>
+      <sequence increment="1" name="cone_collection_method_list_cone_collection_method_code_seq" startValue="1"/>
+      <sequence increment="1" name="favourite_activity_id_seq" startValue="1"/>
+      <sequence increment="1" name="seedlot_audit_seedlot_audit_id_seq" startValue="1"/>
+   </sequences>
+   <tables>
+      <table name="active_orchard_spu" numRows="260" remarks="It is used to control which orchard can be used in the Seedlot registration process and also to indicate which legacy seed plan unit id should to be used." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="orchard_id" nullable="false" remarks="A unique identifier which is assigned to a location where cuttings or A class seed is produced." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="seed_plan_unit_id" nullable="false" remarks="A unique identifier which is assigned to a legacy Seed Planning Unit. It is used for historical porpuse and to link data to Oracle database. A -1 indicates that the orchard has no SPU associated with it." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="active_ind" nullable="false" remarks="Indicates if the combined orchard and SPU are the ones to be used and are active." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="retired_ind" nullable="false" remarks="Indicates retired orchards that should only be used to show legacy information." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="no_spu_ind" nullable="false" remarks="Indicates a new orchard that has not a SPU assigned yet." size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="orchard_id" sequenceNumberInPK="1"/>
+         <primaryKey column="seed_plan_unit_id" sequenceNumberInPK="2"/>
+         <index name="active_orchard_spu_pk" unique="true">
+            <column ascending="true" name="orchard_id"/>
+            <column ascending="true" name="seed_plan_unit_id"/>
+         </index>
+      </table>
+      <table name="cone_collection_method_list" numRows="0" remarks="A list of valid Cone based Collection Method Codes." schema="spar" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('spar.cone_collection_method_list_cone_collection_method_code_seq'::regclass)" digits="0" id="0" name="cone_collection_method_code" nullable="false" remarks="A code describing various Cone Collection Methods." size="10" type="serial" typeCode="4">
+            <child column="cone_collection_method_code" foreignKey="seedlot_cone_col_met_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_collection_method"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="update_timestamp" nullable="true" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="cone_collection_method_code" sequenceNumberInPK="1"/>
+         <index name="cone_collection_method_list_pk" unique="true">
+            <column ascending="true" name="cone_collection_method_code"/>
+         </index>
+      </table>
+      <table name="etl_execution_log_hist" numRows="0" remarks="ETL Tool monitoring table to store all executed instances of batch processing interfaces" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="interface_id" nullable="false" remarks="Unique interface name to represent a batch execution. Refer to EXECUTION_MAP table PK" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="execution_id" nullable="false" remarks="The execution ID that represent a batch execution. Refer to EXECUTION_MAP table PK" size="10" type="int4" typeCode="4">
+            <parent column="id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="favourite_activity"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="execution_status" nullable="false" remarks="Status of this execution. FAILED or SUCCESS expected." size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="execution_details" nullable="true" remarks="Reference text of this interface instance execution" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="source_connect_timedelta" nullable="true" remarks="Timedelta referring to how much time was needed to stablish a connection in the source database" size="49" type="interval" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="5" name="source_extract_timedelta" nullable="true" remarks="Timedelta referring to how much time was needed to execute a extract statement in the source database" size="49" type="interval" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="source_extract_row_count" nullable="true" remarks="Number of rows extracted from the source database for this execution." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="7" name="target_connect_timedelta" nullable="true" remarks="Timedelta referring to how much time was needed to stablish a connection in the target database" size="49" type="interval" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="target_load_timedelta" nullable="true" remarks="Timedelta referring to how much time was needed to load the extracted data in the target database" size="49" type="interval" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="target_load_row_count" nullable="true" remarks="Number of rows inserted or updated in the target database for this execution." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="10" name="process_started_at" nullable="true" remarks="Timestamp when this execution instance was started" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="11" name="process_finished_at" nullable="true" remarks="Timestamp when this execution instance was finished" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="12" name="process_timedelta" nullable="true" remarks="Timedelta referring how much time was spent to execute the whole process." size="49" type="interval" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="13" name="last_run_ts" nullable="true" remarks="Last timestamp this interface instance was executed for batch execution" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="14" name="current_run_ts" nullable="true" remarks="Current timestamp this interface instance was executed of this batch execution" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="15" name="retry_process" nullable="true" remarks="If true, this log instance will be processed again (with last_run_ts and current_run_ts parameters)" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="16" name="updated_at" nullable="false" remarks="Timestamp of the last time this record was updated" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="17" name="created_at" nullable="false" remarks="Timestamp of the time this record was created" size="29" type="timestamp" typeCode="93"/>
+      </table>
+      <table name="etl_execution_map" numRows="0" remarks="ETL Tool monitoring table to store execution details of batch processing interfaces" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="interface_id" nullable="false" remarks="Unique interface name to represent a batch execution. Part of the composite PK, with execution_id column." size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="execution_id" nullable="false" remarks="Execution ID number to represent a instance of interface_id. Part of the composite PK, with interface_id column." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="execution_parent_id" nullable="true" remarks="Reference to a parent execution ID that groups one or more execution_id in a batch run. If null, then this execution_id is a parent." size="10" type="int4" typeCode="4">
+            <parent column="id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="favourite_activity"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="execution_order" nullable="true" remarks="Order of execution of this instance in a collection of same execution_parent_id. Execution runs in ascending order. If it is less than 0, it will not run." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="source_file" nullable="true" remarks="Source instruction file for batch execution" size="200" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="source_db_type" nullable="true" remarks="Database type of the source connection. Expected ORACLE or POSTGRES." size="200" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="source_name" nullable="true" remarks="Source name of this batch execution" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="source_table" nullable="true" remarks="Source table (if it is a single table) of this batch execution" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="target_file" nullable="true" remarks="Target instruction file for batch execution" size="200" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="target_db_type" nullable="true" remarks="Database type of the target connection. Expected ORACLE or POSTGRES." size="200" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="target_name" nullable="true" remarks="Target name of this batch execution" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="target_table" nullable="true" remarks="Target table (if it is a single table) of this batch execution" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="target_primary_key" nullable="true" remarks="Primary key of the target table of this batch execution" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="13" name="truncate_before_run" nullable="false" remarks="If the target table should be truncated before the batch execution" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="14" name="retry_errors" nullable="false" remarks="If true, this process will execute again old instances with errors in ETL_EXECUTION_LOG_HIST" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="15" name="updated_at" nullable="false" remarks="Timestamp of the last time this record was updated" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="16" name="created_at" nullable="false" remarks="Timestamp of the time this record was created" size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="interface_id" sequenceNumberInPK="1"/>
+         <primaryKey column="execution_id" sequenceNumberInPK="2"/>
+         <index name="etl_execution_map_pk" unique="true">
+            <column ascending="true" name="interface_id"/>
+            <column ascending="true" name="execution_id"/>
+         </index>
+      </table>
+      <table name="etl_execution_schedule" numRows="0" remarks="ETL Tool schedule table to define what delta time should be used in the next execution" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="interface_id" nullable="false" remarks="Unique interface name to represent a batch execution. Refer to EXECUTION_MAP table PK" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="execution_id" nullable="false" remarks="The execution ID that represent a batch execution. Refer to EXECUTION_MAP table PK" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="2" name="last_run_ts" nullable="true" remarks="Last timestamp this interface/execution_id was executed for batch execution" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="3" name="current_run_ts" nullable="true" remarks="Current timestamp this interface was executed of this batch execution. It will be the next last_run_ts for this execution." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="updated_at" nullable="false" remarks="Timestamp of the last time this record was updated" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="created_at" nullable="false" remarks="Timestamp of the time this record was created" size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="interface_id" sequenceNumberInPK="1"/>
+         <primaryKey column="execution_id" sequenceNumberInPK="2"/>
+         <index name="etl_execution_schedule_pk" unique="true">
+            <column ascending="true" name="interface_id"/>
+            <column ascending="true" name="execution_id"/>
+         </index>
+      </table>
+      <table name="favourite_activity" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('spar.favourite_activity_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial" typeCode="4">
+            <child column="execution_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="etl_execution_log_hist"/>
+            <child column="execution_parent_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="etl_execution_map"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="user_id" nullable="false" remarks="" size="70" type="varchar" typeCode="12">
+            <parent column="user_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="user_profile"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="activity" nullable="false" remarks="" size="50" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="3" name="highlighted" nullable="true" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="entry_timestamp" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="5" name="update_timestamp" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="favourite_activity_pk" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="gametic_methodology_list" numRows="0" remarks="A list of valid codes indicating the methods used in a seed Orchard to estimate the female or male component of gamete contributions to a Seedlot." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="gametic_methodology_code" nullable="false" remarks="Code that describes the gametic contribution method code for a seedlot" size="3" type="varchar" typeCode="12">
+            <child column="female_gametic_mthd_code" foreignKey="seedlot_female_game_mthd_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+            <child column="male_gametic_mthd_code" foreignKey="seedlot_male_game_mthd_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="female_methodology_ind" nullable="false" remarks="A flag that indicates if the methodology is female or not." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="pli_species_ind" nullable="false" remarks="A flag that indicates if the methodology can be used by a PLI species or not" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="6" name="update_timestamp" nullable="false" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="gametic_methodology_code" sequenceNumberInPK="1"/>
+         <index name="gametic_methodology_list_pk" unique="true">
+            <column ascending="true" name="gametic_methodology_code"/>
+         </index>
+      </table>
+      <table name="genetic_class_list" numRows="0" remarks="A list of valid Genetic Class Codes that indicate if a lot is collected from Parent Trees in an Orchard or from a natural stand." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="genetic_class_code" nullable="false" remarks="A code describing various Genetic Classes." size="1" type="varchar" typeCode="12">
+            <child column="genetic_class_code" foreignKey="seedlot_genetic_class_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+            <child column="genetic_class_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="seedlot_audit"/>
+            <child column="genetic_class_code" foreignKey="fk_genetic_class_code" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_seed_plan_zone"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="update_timestamp" nullable="true" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="genetic_class_code" sequenceNumberInPK="1"/>
+         <index name="genetic_class_list_pk" unique="true">
+            <column ascending="true" name="genetic_class_code"/>
+         </index>
+      </table>
+      <table name="genetic_worth_list" numRows="0" remarks="A list of valid codes that describe the genetic trait(s) of Parent Trees, Seedlots and Vegetative Lots." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="genetic_worth_code" nullable="false" remarks="A code describing various Genetic Worths." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="update_timestamp" nullable="true" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="1"/>
+         <index name="genetic_worth_list_pk" unique="true">
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="method_of_payment_list" numRows="0" remarks="A list of valid Method of Payment Codes." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="method_of_payment_code" nullable="false" remarks="A code describing various Method of Payments." size="3" type="varchar" typeCode="12">
+            <child column="method_of_payment_code" foreignKey="seedlot_own_qnt_meth_pay_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_owner_quantity"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="default_method_ind" nullable="true" remarks="A flag that determines if the method is default." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="effective_date" nullable="false" remarks="The effective date the code is in effect." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="5" name="update_timestamp" nullable="false" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="method_of_payment_code" sequenceNumberInPK="1"/>
+         <index name="method_of_payment_list_pk" unique="true">
+            <column ascending="true" name="method_of_payment_code"/>
+         </index>
+         <index name="only_one_default_method" unique="true">
+            <column ascending="true" name="default_method_ind"/>
+         </index>
+      </table>
+      <table name="seedlot" numRows="0" remarks="A quantity of seed of a particular species and quality collected from either a natural stand or seed Orchard in a given time period." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <child column="seedlot_number" foreignKey="seedlot_coll_met_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_collection_method"/>
+            <child column="seedlot_number" foreignKey="seedlot_genet_worth_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_genetic_worth"/>
+            <child column="seedlot_number" foreignKey="seedlot_orchard_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_orchard"/>
+            <child column="seedlot_number" foreignKey="seedlot_owner_qty_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_owner_quantity"/>
+            <child column="seedlot_number" foreignKey="seedlot_parent_tree_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree"/>
+            <child column="seedlot_number" foreignKey="registration_form_a_class_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_registration_a_class_save"/>
+            <child column="seedlot_number" foreignKey="seedlot_seedplan_zn_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_seed_plan_zone"/>
+            <child column="seedlot_number" foreignKey="seedlot_smp_mix_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_smp_mix"/>
+            <child column="seedlot_number" foreignKey="smp_mix_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="smp_mix"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="seedlot_status_code" nullable="false" remarks="A code which represents the current status of a lot." size="3" type="varchar" typeCode="12">
+            <parent column="seedlot_status_code" foreignKey="seedlot_seedlot_status_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_status_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="applicant_client_number" nullable="true" remarks="A sequentially assigned number which uniquely identifies a Ministry client (applicant)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="applicant_locn_code" nullable="true" remarks="A code to uniquely identify, within each client (applicant), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="applicant_email_address" nullable="true" remarks="Email address of client applying to register the Seedlot" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="vegetation_code" nullable="true" remarks="A code which represents a species of tree or brush." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="genetic_class_code" nullable="true" remarks="A code which represents the Genetic Quality of material (seed or cuttings). &quot;A&quot; class represents superior Orchard produced seed or cuttings. &quot;B&quot; class represents naturally collected seed or cuttings." size="1" type="varchar" typeCode="12">
+            <parent column="genetic_class_code" foreignKey="seedlot_genetic_class_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="genetic_class_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="seedlot_source_code" nullable="true" remarks="A code to indicate if an Orchard Seedlot is from tested Parent Trees, untested or custom." size="3" type="varchar" typeCode="12">
+            <parent column="seedlot_source_code" foreignKey="seedlot_seedlot_source_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_source_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="to_be_registrd_ind" nullable="true" remarks="An indicator which represents whether a Seedlot is intended to be registered for crown land reforestation use (&quot;Y&quot; yes) or not (&quot;N&quot; no)." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="bc_source_ind" nullable="true" remarks="Indicates whether the source of the Seedlot is within British Columbia" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="collection_client_number" nullable="true" remarks="A sequentially assigned number which uniquely identifies a Ministry client (collection)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="collection_locn_code" nullable="true" remarks="A code to uniquely identify, within each client (collection), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="12" name="collection_start_date" nullable="true" remarks="The actual start date (year, month, and day) that the cones (source for seedlots) were collected." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="13" name="collection_end_date" nullable="true" remarks="The actual end date (year, month, and day) that the cones (source for seedlots) were collected." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="14" name="no_of_containers" nullable="true" remarks="The number of containers (sacks of cones) that were collected." size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="15" name="vol_per_container" nullable="true" remarks="The volume of cones, in hectolitres, that were collected per container (as reported on the cone collection form)." size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="16" name="clctn_volume" nullable="true" remarks="A code which represents the number of trees that the Seedlot was collected from." size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="17" name="seedlot_comment" nullable="true" remarks="A free format text field used to enter general comments for a Seedlot." size="2000" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="18" name="interm_strg_client_number" nullable="true" remarks="A sequentially assigned number which uniquely identifies a Ministry client (interm storage)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="19" name="interm_strg_locn_code" nullable="true" remarks="A code to uniquely identify, within each client (interm storage), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="20" name="interm_strg_st_date" nullable="true" remarks="The actual start date (year, month, and day) when the cone was stored during interim storage." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="21" name="interm_strg_end_date" nullable="true" remarks="The actual end date (year, month, and day) when the cone was stored during interim storage." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="22" name="interm_facility_code" nullable="true" remarks="A code which represents the type of facility where the seed was stored during interim storage." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="23" name="female_gametic_mthd_code" nullable="true" remarks="Code that describes the female gametic contribution method code for a Seedlot." size="4" type="varchar" typeCode="12">
+            <parent column="gametic_methodology_code" foreignKey="seedlot_female_game_mthd_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="gametic_methodology_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="24" name="male_gametic_mthd_code" nullable="true" remarks="Code that describes the male gametic contribution method code for a Seedlot." size="4" type="varchar" typeCode="12">
+            <parent column="gametic_methodology_code" foreignKey="seedlot_male_game_mthd_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="gametic_methodology_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="25" name="controlled_cross_ind" nullable="true" remarks="Indicates whether the lot was produced through controlled crosses." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="26" name="biotech_processes_ind" nullable="true" remarks="Indicates if biotechnological processes been used to produce this lot." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="27" name="pollen_contamination_ind" nullable="true" remarks="Indicates if pollen contamination was present in the seed Orchard" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="28" name="pollen_contamination_pct" nullable="true" remarks="The proportion of contaminant pollen present in the seed Orchard." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="29" name="contaminant_pollen_bv" nullable="true" remarks="The estimated Breeding Value of the contaminant pollen in an Orchard." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="30" name="pollen_contamination_mthd_code" nullable="true" remarks="Code that describes the pollen contamination method." size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="31" name="total_parent_trees" nullable="true" remarks="The total number of parents contributing to the Seedlot." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="32" name="smp_success_pct" nullable="true" remarks="The estimated success (percent) of the supplemental mass pollination mix on the Parent Trees in the Orchard." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="33" name="effective_pop_size" nullable="true" remarks="The calculated number of parents contributing to the Seedlot, representing the genetic variety." size="5" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="34" name="smp_parents_outside" nullable="true" remarks="The number of Parent Trees from outside an Orchard used in the supplemental mass pollination mix." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="35" name="non_orchard_pollen_contam_pct" nullable="true" remarks="Non-orchard pollen contamination (%) for the Seedlot." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="36" name="extractory_client_number" nullable="true" remarks="A sequentially assigned number which uniquely identifies a Ministry client (extractory)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="37" name="extractory_locn_code" nullable="true" remarks="A code to uniquely identify, within each client (extractory), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="38" name="extraction_st_date" nullable="true" remarks="The actual start date (year, month, and day) when the seed was extracted from the cones." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="39" name="extraction_end_date" nullable="true" remarks="The actual end date (year, month, and day) when the seed was extracted from the cones." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="40" name="temporary_strg_client_number" nullable="true" remarks="A sequentially assigned number which uniquely identifies a Ministry client (storage)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="41" name="temporary_strg_locn_code" nullable="true" remarks="A code to uniquely identify, within each client (storage), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="42" name="temporary_strg_start_date" nullable="true" remarks="Commencement date of temporary Seedlot storage." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="43" name="temporary_strg_end_date" nullable="true" remarks="End date of Seedlot temporary storage." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="44" name="declared_userid" nullable="true" remarks="The userid of the individual that declares the following: - that the information is true and correct - that they are the owner of the lot or are authorized by the owner(s) to submit the Seedlot application." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="45" name="declared_timestamp" nullable="true" remarks="The date and time that the following were declared by the declarer: - that the information is true and correct - that they are the owner of the lot or are authorized by the owner(s) to submit the Seedlot application." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="46" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="47" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="48" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="49" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="50" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="51" name="interm_strg_locn" nullable="true" remarks="The location where the tree seed was stored during interim storage. Can be used if users did not enter a registered client data." size="55" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="52" name="seed_plan_unit_id" nullable="true" remarks="A unique identifier which is assigned to a Seed Planning Unit." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="53" name="bgc_zone_code" nullable="true" remarks="The Biogeoclimatic Zone of the Seedlot collection area." size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="54" name="bgc_subzone_code" nullable="true" remarks="The Biogeoclimatic Subzone of the Seedlot collection area." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="55" name="variant" nullable="true" remarks="A division of biogeoclimatic information, with multiple variants in a BGC Subzone." size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="56" name="bec_version_id" nullable="true" remarks="A sequence generated identifier for each BEC version." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="57" name="elevation" nullable="true" remarks="The representative elevation in meters where the seed lot originated, which is also the mean area of use elevation for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source elevations." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="58" name="latitude_degrees" nullable="true" remarks="The representative latitude (degrees) where the seed lot originated, which is also the mean area of use latitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source latitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="59" name="latitude_minutes" nullable="true" remarks="The representative latitude (minutes) where the seed lot originated, which is also the mean area of use latitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source latitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="60" name="latitude_seconds" nullable="true" remarks="The representative latitude (seconds) where the seed lot originated, which is also the mean area of use latitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source latitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="61" name="longitude_degrees" nullable="true" remarks="The representative longitude (degrees) where the seed lot originated, which is also the mean area of use longitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source longitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="62" name="longitude_minutes" nullable="true" remarks="The representative longitude (minutes) where the seed lot originated, which is also the mean area of use longitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source longitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="63" name="longitude_seconds" nullable="true" remarks="The representative longitude (seconds) where the seed lot originated, which is also the mean area of use longitude for natural stand lots. For orchard seed lots it is a weighted average of the contributing parent trees source longitudes." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="64" name="collection_elevation" nullable="true" remarks="The representative elevation in meters of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source elevations." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="65" name="collection_elevation_min" nullable="true" remarks="The representative minimum elevation in meters of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source elevations." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="66" name="collection_elevation_max" nullable="true" remarks="The representative maximum elevation in meters of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source elevations." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="67" name="collection_latitude_deg" nullable="true" remarks="The representative latitude (degrees) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="68" name="collection_latitude_min" nullable="true" remarks="The representative latitude (minutes) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="69" name="collection_latitude_sec" nullable="true" remarks="The representative latitude (seconds) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="70" name="collection_latitude_code" nullable="true" remarks="A code which specifies whether the exotic origin latitude is north (N) or south (S)." size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="71" name="collection_longitude_deg" nullable="true" remarks="The representative longitude (degrees) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source longitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="72" name="collection_longitude_min" nullable="true" remarks="The representative longitude (minutes) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source longitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="73" name="collection_longitude_sec" nullable="true" remarks="The representative longitude (seconds) of the Seedlot collection area. For orchard seedlots it is a weighted average of the contributing parent trees source longitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="74" name="collection_longitude_code" nullable="true" remarks="A code which specifies whether the exotic origin longitude is east (E) or west (W)." size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="75" name="elevation_min" nullable="true" remarks="The minimum elevation of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="76" name="elevation_max" nullable="true" remarks="The maximum elevation of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="77" name="latitude_deg_min" nullable="true" remarks="The minimum latitude (degrees) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="78" name="latitude_min_min" nullable="true" remarks="The minimum latitude (minutes) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="79" name="latitude_sec_min" nullable="true" remarks="The minimum latitude (seconds) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="80" name="latitude_deg_max" nullable="true" remarks="The maximum latitude (degrees) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="81" name="latitude_min_max" nullable="true" remarks="The maximum latitude (minutes) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="82" name="latitude_sec_max" nullable="true" remarks="The maximum latitude (seconds) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="83" name="longitude_deg_min" nullable="true" remarks="The minimum longitude (degrees) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="84" name="longitude_min_min" nullable="true" remarks="The minimum longitude (minutes) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="85" name="longitude_sec_min" nullable="true" remarks="The minimum longitude (seconds) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="86" name="longitude_deg_max" nullable="true" remarks="The maximum longitude (degrees) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="87" name="longitude_min_max" nullable="true" remarks="The maximum longitude (minutes) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="88" name="longitude_sec_max" nullable="true" remarks="The maximum longitude (seconds) of the seedlot area of use. For lots from natural stands, this is calculated using the transfer limits. For lots from tested parent trees (orchards) either use Seed Planning Unit minimum or the collection latitude." size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="89" name="smp_mean_bv_growth" nullable="true" remarks="The breeding value for the Growth trait calculated from the supplemental mass pollination mix applied to parent trees." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="90" name="area_of_use_comment" nullable="true" remarks="Comments on Seedlot area of use." size="2000" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="91" name="approved_timestamp" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="92" name="approved_userid" nullable="true" remarks="" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="93" name="mean_geom" nullable="true" remarks="The 3D mean geom of parent trees." size="2147483647" type="geometry" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="NULL::character varying" digits="0" id="94" name="bgc_zone_description" nullable="true" remarks="The description of the BEC zone." size="120" type="varchar" typeCode="12"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <index name="seedlot_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+         </index>
+      </table>
+      <table name="seedlot_audit" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('spar.seedlot_audit_seedlot_audit_id_seq'::regclass)" digits="0" id="0" name="seedlot_audit_id" nullable="false" remarks="Serial Incremental number referring to a unique primary key for this table" size="10" type="serial" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="1" name="audit_date" nullable="false" remarks="Date when this audit record was created (representing with some precision when the statement was executed)" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="'I'::character varying" digits="0" id="2" name="spar_audit_code" nullable="false" remarks="Type of statement executed in spar.seedlot table: I=INSERT, U=UPDATE, D=DELETE. Note that DELETE record represents only the latest data whiped out from the seedlot table" size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="db_user" nullable="false" remarks="Postgres database user who executed the statement in spar.seedlot table" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="1" digits="0" id="4" name="audit_revision_version" nullable="false" remarks="Record registered version for audit purposes." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="seedlot_number" nullable="false" remarks="Referring value for spar.seedlot.seedlot_number column" size="5" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="seedlot_status_code" nullable="false" remarks="Referring value for spar.seedlot.seedlot_status_code column" size="3" type="varchar" typeCode="12">
+            <parent column="seedlot_status_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="seedlot_status_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="applicant_client_number" nullable="true" remarks="Referring value for spar.seedlot.applicant_client_number column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="applicant_locn_code" nullable="true" remarks="Referring value for spar.seedlot.applicant_locn_code column" size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="applicant_email_address" nullable="true" remarks="Referring value for spar.seedlot.applicant_email_address column" size="100" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="vegetation_code" nullable="true" remarks="Referring value for spar.seedlot.vegetation_code column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="genetic_class_code" nullable="true" remarks="Referring value for spar.seedlot.genetic_class_code column" size="1" type="varchar" typeCode="12">
+            <parent column="genetic_class_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="genetic_class_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="seedlot_source_code" nullable="true" remarks="Referring value for spar.seedlot.seedlot_source_code column" size="3" type="varchar" typeCode="12">
+            <parent column="seedlot_source_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="seedlot_source_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="13" name="to_be_registrd_ind" nullable="true" remarks="Referring value for spar.seedlot.to_be_registrd_ind column" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="14" name="bc_source_ind" nullable="true" remarks="Referring value for spar.seedlot.bc_source_ind column" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="15" name="collection_client_number" nullable="true" remarks="Referring value for spar.seedlot.collection_client_number column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="16" name="collection_locn_code" nullable="true" remarks="Referring value for spar.seedlot.collection_locn_code column" size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="17" name="collection_start_date" nullable="true" remarks="Referring value for spar.seedlot.collection_start_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="18" name="collection_end_date" nullable="true" remarks="Referring value for spar.seedlot.collection_end_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="19" name="no_of_containers" nullable="true" remarks="Referring value for spar.seedlot.no_of_containers column" size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="20" name="vol_per_container" nullable="true" remarks="Referring value for spar.seedlot.vol_per_container column" size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="21" name="clctn_volume" nullable="true" remarks="Referring value for spar.seedlot.clctn_volume column" size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="22" name="seedlot_comment" nullable="true" remarks="Referring value for spar.seedlot.seedlot_comment column" size="2000" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="23" name="interm_strg_client_number" nullable="true" remarks="Referring value for spar.seedlot.interm_strg_client_number column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="24" name="interm_strg_locn_code" nullable="true" remarks="Referring value for spar.seedlot.interm_strg_locn_code column" size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="25" name="interm_strg_st_date" nullable="true" remarks="Referring value for spar.seedlot.interm_strg_st_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="26" name="interm_strg_end_date" nullable="true" remarks="Referring value for spar.seedlot.interm_strg_end_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="27" name="interm_facility_code" nullable="true" remarks="Referring value for spar.seedlot.interm_facility_code column" size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="28" name="female_gametic_mthd_code" nullable="true" remarks="Referring value for spar.seedlot.female_gametic_mthd_code column" size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="29" name="male_gametic_mthd_code" nullable="true" remarks="Referring value for spar.seedlot.male_gametic_mthd_code column" size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="30" name="controlled_cross_ind" nullable="true" remarks="Referring value for spar.seedlot.controlled_cross_ind column" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="31" name="biotech_processes_ind" nullable="true" remarks="Referring value for spar.seedlot.biotech_processes_ind column" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="32" name="pollen_contamination_ind" nullable="true" remarks="Referring value for spar.seedlot.pollen_contamination_ind column" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="33" name="pollen_contamination_pct" nullable="true" remarks="Referring value for spar.seedlot.pollen_contamination_pct column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="34" name="contaminant_pollen_bv" nullable="true" remarks="Referring value for spar.seedlot.contaminant_pollen_bv column" size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="35" name="pollen_contamination_mthd_code" nullable="true" remarks="Referring value for spar.seedlot.pollen_contamination_mthd_code column" size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="36" name="total_parent_trees" nullable="true" remarks="Referring value for spar.seedlot.total_parent_trees column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="37" name="smp_success_pct" nullable="true" remarks="Referring value for spar.seedlot.smp_success_pct column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="38" name="effective_pop_size" nullable="true" remarks="Referring value for spar.seedlot.effective_pop_size column" size="5" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="39" name="smp_parents_outside" nullable="true" remarks="Referring value for spar.seedlot.smp_parents_outside column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="40" name="non_orchard_pollen_contam_pct" nullable="true" remarks="Referring value for spar.seedlot.non_orchard_pollen_contam_pct column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="41" name="extractory_client_number" nullable="true" remarks="Referring value for spar.seedlot.extractory_client_number column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="42" name="extractory_locn_code" nullable="true" remarks="Referring value for spar.seedlot.extractory_locn_code column" size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="43" name="extraction_st_date" nullable="true" remarks="Referring value for spar.seedlot.extraction_st_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="44" name="extraction_end_date" nullable="true" remarks="Referring value for spar.seedlot.extraction_end_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="45" name="temporary_strg_client_number" nullable="true" remarks="Referring value for spar.seedlot.temporary_strg_client_number column" size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="46" name="temporary_strg_locn_code" nullable="true" remarks="Referring value for spar.seedlot.temporary_strg_locn_code column" size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="47" name="temporary_strg_start_date" nullable="true" remarks="Referring value for spar.seedlot.temporary_strg_start_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="48" name="temporary_strg_end_date" nullable="true" remarks="Referring value for spar.seedlot.temporary_strg_end_date column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="49" name="interm_strg_locn" nullable="true" remarks="" size="55" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="50" name="declared_userid" nullable="true" remarks="Referring value for spar.seedlot.declared_userid column" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="51" name="declared_timestamp" nullable="true" remarks="Referring value for spar.seedlot.declared_timestamp column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="52" name="entry_userid" nullable="false" remarks="Referring value for spar.seedlot.entry_userid column" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="53" name="entry_timestamp" nullable="false" remarks="Referring value for spar.seedlot.entry_timestamp column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="54" name="update_userid" nullable="false" remarks="Referring value for spar.seedlot.update_userid column" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="55" name="update_timestamp" nullable="false" remarks="Referring value for spar.seedlot.update_timestamp column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="56" name="revision_count" nullable="false" remarks="Referring value for spar.seedlot.revision_count column" size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="57" name="seed_plan_unit_id" nullable="true" remarks="Referring value for spar.seedlot.approved_timestamp column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="58" name="bgc_zone_code" nullable="true" remarks="Referring value for spar.seedlot.approved_userid column" size="4" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="59" name="bgc_subzone_code" nullable="true" remarks="Referring value for spar.seedlot.bgc_subzone_code column" size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="60" name="variant" nullable="true" remarks="Referring value for spar.seedlot.variant column" size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="61" name="bec_version_id" nullable="true" remarks="Referring value for spar.seedlot.bec_version_id column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="62" name="elevation" nullable="true" remarks="Referring value for spar.seedlot.elevation column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="63" name="latitude_degrees" nullable="true" remarks="Referring value for spar.seedlot.latitude_degrees column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="64" name="latitude_minutes" nullable="true" remarks="Referring value for spar.seedlot.latitude_minutes column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="65" name="latitude_seconds" nullable="true" remarks="Referring value for spar.seedlot.latitude_seconds column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="66" name="longitude_degrees" nullable="true" remarks="Referring value for spar.seedlot.longitude_degrees column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="67" name="longitude_minutes" nullable="true" remarks="Referring value for spar.seedlot.longitude_minutes column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="68" name="longitude_seconds" nullable="true" remarks="Referring value for spar.seedlot.longitude_seconds column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="69" name="collection_elevation" nullable="true" remarks="Referring value for spar.seedlot.collection_elevation column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="70" name="collection_elevation_min" nullable="true" remarks="Referring value for spar.seedlot.collection_elevation_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="71" name="collection_elevation_max" nullable="true" remarks="Referring value for spar.seedlot.collection_elevation_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="72" name="collection_latitude_deg" nullable="true" remarks="Referring value for spar.seedlot.collection_latitude_deg column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="73" name="collection_latitude_min" nullable="true" remarks="Referring value for spar.seedlot.collection_latitude_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="74" name="collection_latitude_sec" nullable="true" remarks="Referring value for spar.seedlot.collection_latitude_sec column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="75" name="collection_latitude_code" nullable="true" remarks="Referring value for spar.seedlot.collection_latitude_code column" size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="76" name="collection_longitude_deg" nullable="true" remarks="Referring value for spar.seedlot.collection_longitude_deg column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="77" name="collection_longitude_min" nullable="true" remarks="Referring value for spar.seedlot.collection_longitude_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="78" name="collection_longitude_sec" nullable="true" remarks="Referring value for spar.seedlot.collection_longitude_sec column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="79" name="collection_longitude_code" nullable="true" remarks="Referring value for spar.seedlot.collection_longitude_code column" size="1" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="80" name="elevation_min" nullable="true" remarks="Referring value for spar.seedlot.elevation_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="81" name="elevation_max" nullable="true" remarks="Referring value for spar.seedlot.elevation_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="82" name="latitude_deg_min" nullable="true" remarks="Referring value for spar.seedlot.latitude_deg_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="83" name="latitude_min_min" nullable="true" remarks="Referring value for spar.seedlot.latitude_min_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="84" name="latitude_sec_min" nullable="true" remarks="Referring value for spar.seedlot.latitude_sec_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="85" name="latitude_deg_max" nullable="true" remarks="Referring value for spar.seedlot.latitude_deg_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="86" name="latitude_min_max" nullable="true" remarks="Referring value for spar.seedlot.latitude_min_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="87" name="latitude_sec_max" nullable="true" remarks="Referring value for spar.seedlot.latitude_sec_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="88" name="longitude_deg_min" nullable="true" remarks="Referring value for spar.seedlot.longitude_deg_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="89" name="longitude_min_min" nullable="true" remarks="Referring value for spar.seedlot.longitude_min_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="90" name="longitude_sec_min" nullable="true" remarks="Referring value for spar.seedlot.longitude_sec_min column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="91" name="longitude_deg_max" nullable="true" remarks="Referring value for spar.seedlot.longitude_deg_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="92" name="longitude_min_max" nullable="true" remarks="Referring value for spar.seedlot.longitude_min_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="93" name="longitude_sec_max" nullable="true" remarks="Referring value for spar.seedlot.longitude_sec_max column" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="94" name="smp_mean_bv_growth" nullable="true" remarks="Referring value for spar.seedlot.smp_mean_bv_growth column" size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="95" name="area_of_use_comment" nullable="true" remarks="Referring value for spar.seedlot.area_of_use_comment column" size="2000" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="96" name="approved_timestamp" nullable="true" remarks="Referring value for spar.seedlot.approved_timestamp column" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="97" name="approved_userid" nullable="true" remarks="Referring value for spar.seedlot.approved_userid column" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="98" name="mean_geom" nullable="true" remarks="Referring value for spar.seedlot.mean_geom column" size="2147483647" type="geometry" typeCode="1111"/>
+         <primaryKey column="seedlot_audit_id" sequenceNumberInPK="1"/>
+         <index name="seedlot_audit_pk" unique="true">
+            <column ascending="true" name="seedlot_audit_id"/>
+         </index>
+      </table>
+      <table name="seedlot_collection_method" numRows="0" remarks="The collection methods in which the cones of a Seedlot were collected." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_coll_met_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="cone_collection_method_code" nullable="false" remarks="A code representing the method in which the cones were collected." size="10" type="int4" typeCode="4">
+            <parent column="cone_collection_method_code" foreignKey="seedlot_cone_col_met_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="cone_collection_method_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="cone_collection_method_other_desc" nullable="true" remarks="A description of the method in which the cones were collected - used only when the user selects the option &quot;Other&quot;." size="50" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot collection method." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="4" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot collection method was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot collection method." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="6" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot collection method was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="cone_collection_method_code" sequenceNumberInPK="2"/>
+         <index name="seedlot_collection_method_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="cone_collection_method_code"/>
+         </index>
+      </table>
+      <table name="seedlot_genetic_worth" numRows="0" remarks="A subclassification of Genetic Quality for &quot;A&quot; class Seedlots." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_genet_worth_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="genetic_worth_code" nullable="false" remarks="A code which represents a subclassification of Genetic Quality for &quot;A&quot; class seedlots." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="2" name="genetic_quality_value" nullable="false" remarks="The rating for a subclassification of Genetic Quality for &quot;A&quot; class seedlots." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="2" id="3" name="tested_parent_tree_cont_pct" nullable="true" remarks="Percentage of parent trees that were tested for the trait and contributed to the seedlot" size="6" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot Genetic Worth." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="5" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot Genetic Worth was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot Genetic Worth." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="7" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot Genetic Worth was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="2"/>
+         <index name="seedlot_genetic_worth_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="seedlot_orchard" numRows="0" remarks="Orchard location where cuttings or A class seed is produced." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_orchard_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="orchard_id" nullable="false" remarks="A unique identifier which is assigned to a location where cuttings or A class seed is produced." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot Orchard." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="3" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot Orchard was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot Orchard." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="5" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot Orchard was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="7" name="primary_ind" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="primary_ind" sequenceNumberInPK="2"/>
+         <index name="seedlot_orchard_pkey" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="primary_ind"/>
+         </index>
+         <index name="unique_seedlot_orchard_key" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="orchard_id"/>
+         </index>
+      </table>
+      <table name="seedlot_owner_quantity" numRows="0" remarks="A Seedlot may be owned by more than one owner. Each owner owns a specific quantity of seed which may be reserved for the use of that owner and/or surplus and available for use by others." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_owner_qty_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="owner_client_number" nullable="false" remarks="A sequentially assigned number which uniquely identifies a Ministry client (owner)." size="8" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="owner_locn_code" nullable="false" remarks="A code to uniquely identify, within each client (owner), the addresses of different divisions or locations at which the client operates. The location code is sequentially assigned starting with &quot;00&quot; for the client´s permanent address." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="3" name="original_pct_owned" nullable="false" remarks="The original percentage of seed that was owned by a client." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="4" name="original_pct_rsrvd" nullable="false" remarks="The original percentage of seed from an owner´s portion of a Seedlot that has been declared reserved." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="5" name="original_pct_srpls" nullable="false" remarks="The original percentage of seed from an owner´s portion of a Seedlot that has been declared surplus." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="method_of_payment_code" nullable="true" remarks="A code which represents the method of payment for services where payment is required." size="3" type="varchar" typeCode="12">
+            <parent column="method_of_payment_code" foreignKey="seedlot_own_qnt_meth_pay_cd_fk" implied="false" onDeleteCascade="false" schema="spar" table="method_of_payment_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="spar_fund_srce_code" nullable="true" remarks="A code which represents the source funds for payment of the request." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot owner quantity." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="9" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot owner quantity was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot owner quantity." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="11" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot owner quantity was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="owner_client_number" sequenceNumberInPK="2"/>
+         <primaryKey column="owner_locn_code" sequenceNumberInPK="3"/>
+         <index name="seedlot_owner_quantity_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="owner_client_number"/>
+            <column ascending="true" name="owner_locn_code"/>
+         </index>
+      </table>
+      <table name="seedlot_parent_tree" numRows="0" remarks="The contribution of Parent Trees (with their cone and pollen quantity of each Parent Tree) to an Orchard Seedlot (Genetic Class = &quot;A&quot;)" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <child column="seedlot_number" foreignKey="sl_ptree_genqly_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree_gen_qlty"/>
+            <child column="seedlot_number" foreignKey="sl_ptree_smp_mix_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree_smp_mix"/>
+            <parent column="seedlot_number" foreignKey="seedlot_parent_tree_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="parent_tree_id" nullable="false" remarks="A unique identifier for each Parent Tree." size="10" type="int4" typeCode="4">
+            <child column="parent_tree_id" foreignKey="sl_ptree_genqly_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree_gen_qlty"/>
+            <child column="parent_tree_id" foreignKey="sl_ptree_smp_mix_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree_smp_mix"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="parent_tree_number" nullable="false" remarks="The original registration number given to a Parent Tree in conjunction with a Species Code." size="5" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="cone_count" nullable="false" remarks="The number of cones counted or estimated from each Parent Tree for a Seedlot." size="20" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="4" name="pollen_count" nullable="false" remarks="The amount of pollen counted or estimated for each Parent Tree in the Seedlot." size="20" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="smp_success_pct" nullable="true" remarks="The estimated success (percent) of the supplemental mass pollination mix on the Parent Trees in the Orchard." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="non_orchard_pollen_contam_pct" nullable="true" remarks="Non-orchard pollen contamination (%)." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="11" id="7" name="total_genetic_worth_contrib" nullable="true" remarks="Total Parent (seed) genetic worth contribution to seedlot" size="15" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot Parent Tree." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="9" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot Parent Tree was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot Parent Tree." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="11" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot Parent Tree was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="parent_tree_id" sequenceNumberInPK="2"/>
+         <index name="seedlot_parent_tree_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="parent_tree_id"/>
+         </index>
+      </table>
+      <table name="seedlot_parent_tree_gen_qlty" numRows="0" remarks="The Genetic Worth value(s) for an Orchard Seedlot (Genetic Class = &quot;A&quot;) calculated from the Genetic Quality (Breeding Values) of the Parent Trees contributing to the Seedlot." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="sl_ptree_genqly_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="parent_tree_id" nullable="false" remarks="A unique identifier for each Parent Tree." size="10" type="int4" typeCode="4">
+            <parent column="parent_tree_id" foreignKey="sl_ptree_genqly_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="genetic_type_code" nullable="false" remarks="Describes the comparative measure of genetic value for a specific genetic trait of a Parent Tree.  Examples are BV (Breeding Value) and CV (Clonal Value)." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="genetic_worth_code" nullable="false" remarks="A code describing various Genetic Worths." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="4" name="genetic_quality_value" nullable="false" remarks="The Genetic Quality value based on the test assessment for a Parent Tree from a test no. and series." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="estimated_ind" nullable="true" remarks="Indicates whether or not the test result was estimated. A Genetic Quality value of 2.0 is estimated for Untested Parent Trees (i.e. Parent Trees without an Area of Use) or for Tested Parent Trees (i.e. Parent Trees with an Area of Use) without a Genetic." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="untested_ind" nullable="true" remarks="Indicates whether or not the test result was estimated for an untested Parent Tree." size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot Parent Tree Genetic Quality." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="8" name="entry_timestamp" nullable="false" remarks="The time and date a Seedlot Parent Tree Genetic Quality was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot Parent Tree Genetic Quality." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="10" name="update_timestamp" nullable="false" remarks="The time and date a Seedlot Parent Tree Genetic Quality was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="revision_count" nullable="true" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="parent_tree_id" sequenceNumberInPK="2"/>
+         <primaryKey column="genetic_type_code" sequenceNumberInPK="3"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="4"/>
+         <index name="seedlot_parent_tree_gen_qlt_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="parent_tree_id"/>
+            <column ascending="true" name="genetic_type_code"/>
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="seedlot_parent_tree_smp_mix" numRows="0" remarks="Supplemental Mass Polination for a given Seedlot, Parent Tree, Genetic Type and Genetic worth combination." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="sl_ptree_smp_mix_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="parent_tree_id" nullable="false" remarks="A unique identifier for each Parent Tree." size="10" type="int4" typeCode="4">
+            <parent column="parent_tree_id" foreignKey="sl_ptree_smp_mix_sl_ptree_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot_parent_tree"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="genetic_type_code" nullable="false" remarks="Describes the comparative measure of genetic value for a specific genetic trait of a Parent Tree. Examples are BV (Breeding Value) and CV (Clonal Value)." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="genetic_worth_code" nullable="false" remarks="A code describing various Genetic Worths." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="4" name="genetic_quality_value" nullable="false" remarks="The Genetic Quality value based on the test assessment for a Parent Tree from a test no. and series." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Parent Tree SMP mix" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="6" name="entry_timestamp" nullable="false" remarks="The time and date a Parent Tree SMP mix was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Parent Tree SMP mix." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="8" name="update_timestamp" nullable="false" remarks="The time and date a Parent Tree SMP mix was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="parent_tree_id" sequenceNumberInPK="2"/>
+         <primaryKey column="genetic_type_code" sequenceNumberInPK="3"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="4"/>
+         <index name="seedlot_parent_tree_smp_mix_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="parent_tree_id"/>
+            <column ascending="true" name="genetic_type_code"/>
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="seedlot_registration_a_class_save" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="" size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="registration_form_a_class_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="all_step_data" nullable="false" remarks="" size="2147483647" type="jsonb" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="progress_status" nullable="false" remarks="" size="2147483647" type="jsonb" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="entry_userid" nullable="false" remarks="" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="entry_timestamp" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="update_userid" nullable="false" remarks="" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="6" name="update_timestamp" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="revision_count" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <index name="registration_form_a_class_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+         </index>
+      </table>
+      <table name="seedlot_seed_plan_zone" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_seedplan_zn_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="seed_plan_zone_code" nullable="false" remarks="A code describing various Seed Planning Zones." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the Seedlot collection method." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="3" name="entry_timestamp" nullable="true" remarks="The time and date a Seedlot collection method was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="update_userid" nullable="false" remarks="The userid of the individual that changed the Seedlot collection method." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="5" name="update_timestamp" nullable="true" remarks="The time and date a Seedlot collection method was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="seed_plan_zone_id" nullable="true" remarks="A unique identifier for a combination of Seed Plan Zone Code, Genetic Class and Vegetation Code" size="5" type="int2" typeCode="5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="genetic_class_code" nullable="true" remarks="A code describing various Genetic Classes." size="1" type="varchar" typeCode="12">
+            <parent column="genetic_class_code" foreignKey="fk_genetic_class_code" implied="false" onDeleteCascade="false" schema="spar" table="genetic_class_list"/>
+         </column>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="9" name="primary_ind" nullable="true" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="seed_plan_zone_description" nullable="true" remarks="" size="120" type="varchar" typeCode="12"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="seed_plan_zone_code" sequenceNumberInPK="2"/>
+         <index name="seedlot_seed_plan_zone_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="seed_plan_zone_code"/>
+         </index>
+      </table>
+      <table name="seedlot_smp_mix" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="" size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="seedlot_smp_mix_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="genetic_worth_code" nullable="false" remarks="" size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="2" name="genetic_quality_value" nullable="false" remarks="" size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="entry_userid" nullable="false" remarks="" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="entry_timestamp" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="update_userid" nullable="false" remarks="" size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="6" name="update_timestamp" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="revision_count" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="2"/>
+         <index name="seedlot_smp_mix_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="seedlot_source_list" numRows="3" remarks="A list of valid Lot Source Codes." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_source_code" nullable="false" remarks="A code to indicate if an orchard seedlot is from tested parent trees, untested or custom." size="3" type="varchar" typeCode="12">
+            <child column="seedlot_source_code" foreignKey="seedlot_seedlot_source_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+            <child column="seedlot_source_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="seedlot_audit"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="update_timestamp" nullable="true" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="default_source_ind" nullable="true" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="seedlot_source_code" sequenceNumberInPK="1"/>
+         <index name="seedlot_source_list_pk" unique="true">
+            <column ascending="true" name="seedlot_source_code"/>
+         </index>
+         <index name="only_one_default_source" unique="true">
+            <column ascending="true" name="default_source_ind"/>
+         </index>
+      </table>
+      <table name="seedlot_status_list" numRows="0" remarks="A list of valid Seedlot based Status Codes." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_status_code" nullable="false" remarks="A code describing various Seedlot Statuses." size="3" type="varchar" typeCode="12">
+            <child column="seedlot_status_code" foreignKey="seedlot_seedlot_status_code_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+            <child column="seedlot_status_code" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="seedlot_audit"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="description" nullable="false" remarks="A description for the affiliated code." size="120" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="effective_date" nullable="false" remarks="The effective date the code is in effect" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="expiry_date" nullable="false" remarks="The date the code expires on." size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="4" name="update_timestamp" nullable="true" remarks="The date and time of the last update." size="29" type="timestamp" typeCode="93"/>
+         <primaryKey column="seedlot_status_code" sequenceNumberInPK="1"/>
+         <index name="seedlot_status_list_pk" unique="true">
+            <column ascending="true" name="seedlot_status_code"/>
+         </index>
+      </table>
+      <table name="smp_mix" numRows="0" remarks="A table listing the individual Parent Trees that contributed to the Supplemental Mass Pollination mix of an Orchard Seedlot (Genetic Class = &quot;A&quot;)." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <child column="seedlot_number" foreignKey="smp_mix_gen_qlty_smp_mix_pk" implied="false" onDeleteCascade="false" schema="spar" table="smp_mix_gen_qlty"/>
+            <parent column="seedlot_number" foreignKey="smp_mix_seedlot_fk" implied="false" onDeleteCascade="false" schema="spar" table="seedlot"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="parent_tree_id" nullable="false" remarks="A unique identifier for each Parent Tree." size="10" type="int4" typeCode="4">
+            <child column="parent_tree_id" foreignKey="smp_mix_gen_qlty_smp_mix_pk" implied="false" onDeleteCascade="false" schema="spar" table="smp_mix_gen_qlty"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="parent_tree_number" nullable="false" remarks="The original registration number given to a Parent Tree in conjunction with a Species Code." size="5" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="amount_of_material" nullable="false" remarks="The amount of Parent Tree material used for calculating the proportion of mix. Usually a volume recorded in mL." size="10" type="int4" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="4" name="proportion" nullable="true" remarks="The proportion of each Parent Tree material used for calculating SMP mix." size="20" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the SMP mix." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="6" name="entry_timestamp" nullable="false" remarks="The time and date a SMP mix was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="update_userid" nullable="false" remarks="The userid of the individual that changed the SMP mix." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="8" name="update_timestamp" nullable="false" remarks="The time and date a SMP mix was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="parent_tree_id" sequenceNumberInPK="2"/>
+         <index name="smp_mix_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="parent_tree_id"/>
+         </index>
+      </table>
+      <table name="smp_mix_gen_qlty" numRows="0" remarks="The calculated Genetic Worth value(s) for the Supplemental Mass Pollination mix that contributed to an Orchard Seedlot (Genetic Class = &quot;A&quot;) the Parent Trees contributing to a Seedlot." schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="seedlot_number" nullable="false" remarks="The unique number (key) assigned to a quantity of seed of a particular species and quality from a given location collected at a given time." size="5" type="varchar" typeCode="12">
+            <parent column="seedlot_number" foreignKey="smp_mix_gen_qlty_smp_mix_pk" implied="false" onDeleteCascade="false" schema="spar" table="smp_mix"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="parent_tree_id" nullable="false" remarks="A unique identifier for each Parent Tree." size="10" type="int4" typeCode="4">
+            <parent column="parent_tree_id" foreignKey="smp_mix_gen_qlty_smp_mix_pk" implied="false" onDeleteCascade="false" schema="spar" table="smp_mix"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="genetic_type_code" nullable="false" remarks="Describes the comparative measure of genetic value for a specific genetic trait of a Parent Tree. Examples are BV (Breeding Value) and CV (Clonal Value)." size="2" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="genetic_worth_code" nullable="false" remarks="A code describing various Genetic Worths." size="3" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="1" id="4" name="genetic_quality_value" nullable="false" remarks="The Genetic Quality value based on the test assessment for a Parent Tree from a test no. and series." size="4" type="numeric" typeCode="2"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="estimated_ind" nullable="true" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="entry_userid" nullable="false" remarks="The userid of the individual that entered the SMP mix Genetic Quality." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="7" name="entry_timestamp" nullable="false" remarks="The time and date a SMP mix Genetic Quality was entered onto the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="update_userid" nullable="false" remarks="The userid of the individual that changed the SMP mix Genetic Quality." size="30" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="CURRENT_TIMESTAMP" digits="6" id="9" name="update_timestamp" nullable="false" remarks="The time and date a SMP mix Genetic Quality was last updated on the system." size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="revision_count" nullable="false" remarks="A counter used to ensure data integrity. This item should be incremented during each update." size="10" type="int4" typeCode="4"/>
+         <primaryKey column="seedlot_number" sequenceNumberInPK="1"/>
+         <primaryKey column="parent_tree_id" sequenceNumberInPK="2"/>
+         <primaryKey column="genetic_type_code" sequenceNumberInPK="3"/>
+         <primaryKey column="genetic_worth_code" sequenceNumberInPK="4"/>
+         <index name="smp_mix_gen_qlty_pk" unique="true">
+            <column ascending="true" name="seedlot_number"/>
+            <column ascending="true" name="parent_tree_id"/>
+            <column ascending="true" name="genetic_type_code"/>
+            <column ascending="true" name="genetic_worth_code"/>
+         </index>
+      </table>
+      <table name="user_profile" numRows="0" remarks="" schema="spar" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="user_id" nullable="false" remarks="" size="70" type="varchar" typeCode="12">
+            <child column="user_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="spar" table="favourite_activity"/>
+         </column>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="1" name="dark_theme" nullable="true" remarks="" size="1" type="bool" typeCode="-7"/>
+         <primaryKey column="user_id" sequenceNumberInPK="1"/>
+         <index name="user_pk" unique="true">
+            <column ascending="true" name="user_id"/>
+         </index>
+      </table>
+   </tables>
+   <routines>
+      <routine dataAccess="MODIFIES" deterministic="false" name="seedlot_if_modified_func()" returnType="trigger" securityType="DEFINER" type="FUNCTION">
+         <comment/>
+         <definition language="plpgsql"><![CDATA[DECLARE
+    v_old_data TEXT;
+    v_new_data TEXT;
+  v_auditrevision int;
+BEGIN
+    if (TG_OP = 'UPDATE') then
+        v_old_data := ROW(OLD.*);
+        v_new_data := ROW(NEW.*);
+    /* AUDIT REVISION number used to order the statements executed in the row */
+    v_auditrevision := (SELECT MAX(COALESCE(audit_revision_version,1))+1 FROM spar.seedlot_audit WHERE seedlot_number = NEW.seedlot_number);
+        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,interm_strg_locn,declared_userid,declared_timestamp,entry_userid,entry_timestamp,seed_plan_unit_id,bgc_zone_code,bgc_subzone_code,variant,bec_version_id,elevation,latitude_degrees,latitude_minutes,latitude_seconds,longitude_degrees,longitude_minutes,longitude_seconds,collection_elevation,collection_elevation_min,collection_elevation_max,collection_latitude_deg,collection_latitude_min,collection_latitude_sec,collection_latitude_code,collection_longitude_deg,collection_longitude_min,collection_longitude_sec,collection_longitude_code,elevation_min,elevation_max,latitude_deg_min,latitude_min_min,latitude_sec_min,latitude_deg_max,latitude_min_max,latitude_sec_max,longitude_deg_min,longitude_min_min,longitude_sec_min,longitude_deg_max,longitude_min_max,longitude_sec_max,smp_mean_bv_growth,area_of_use_comment,approved_timestamp,approved_userid,mean_geom,update_userid,update_timestamp,revision_count)
+    VALUES(
+    /*spar_audit_code                */ 'U',
+    /*db_user                 	     */ session_user::TEXT,
+    /*audit_revision_version  	     */ coalesce(v_auditrevision,1),
+    /*seedlot_number                 */ NEW.seedlot_number,
+    /*seedlot_status_code            */ NEW.seedlot_status_code,
+    /*applicant_client_number        */ NEW.applicant_client_number,
+    /*applicant_locn_code            */ NEW.applicant_locn_code,
+    /*applicant_email_address        */ NEW.applicant_email_address,
+    /*vegetation_code                */ NEW.vegetation_code,
+    /*genetic_class_code             */ NEW.genetic_class_code,
+    /*seedlot_source_code            */ NEW.seedlot_source_code,
+    /*to_be_registrd_ind             */ NEW.to_be_registrd_ind,
+    /*bc_source_ind                  */ NEW.bc_source_ind,
+    /*collection_client_number       */ NEW.collection_client_number,
+    /*collection_locn_code           */ NEW.collection_locn_code,
+    /*collection_start_date          */ NEW.collection_start_date,
+    /*collection_end_date            */ NEW.collection_end_date,
+    /*no_of_containers               */ NEW.no_of_containers,
+    /*vol_per_container              */ NEW.vol_per_container,
+    /*clctn_volume                   */ NEW.clctn_volume,
+    /*seedlot_comment                */ NEW.seedlot_comment,
+    /*interm_strg_client_number      */ NEW.interm_strg_client_number,
+    /*interm_strg_locn_code          */ NEW.interm_strg_locn_code,
+    /*interm_strg_st_date            */ NEW.interm_strg_st_date,
+    /*interm_strg_end_date           */ NEW.interm_strg_end_date,
+    /*interm_facility_code           */ NEW.interm_facility_code,
+    /*female_gametic_mthd_code       */ NEW.female_gametic_mthd_code,
+    /*male_gametic_mthd_code         */ NEW.male_gametic_mthd_code,
+    /*controlled_cross_ind           */ NEW.controlled_cross_ind,
+    /*biotech_processes_ind          */ NEW.biotech_processes_ind,
+    /*pollen_contamination_ind       */ NEW.pollen_contamination_ind,
+    /*pollen_contamination_pct       */ NEW.pollen_contamination_pct,
+    /*contaminant_pollen_bv          */ NEW.contaminant_pollen_bv,
+    /*pollen_contamination_mthd_code */ NEW.pollen_contamination_mthd_code,
+    /*total_parent_trees             */ NEW.total_parent_trees,
+    /*smp_success_pct                */ NEW.smp_success_pct,
+    /*effective_pop_size             */ NEW.effective_pop_size,
+    /*smp_parents_outside            */ NEW.smp_parents_outside,
+    /*non_orchard_pollen_contam_pct  */ NEW.non_orchard_pollen_contam_pct,
+    /*extractory_client_number       */ NEW.extractory_client_number,
+    /*extractory_locn_code           */ NEW.extractory_locn_code,
+    /*extraction_st_date             */ NEW.extraction_st_date,
+    /*extraction_end_date            */ NEW.extraction_end_date,
+    /*temporary_strg_client_number   */ NEW.temporary_strg_client_number,
+    /*temporary_strg_locn_code       */ NEW.temporary_strg_locn_code,
+    /*temporary_strg_start_date      */ NEW.temporary_strg_start_date,
+    /*temporary_strg_end_date        */ NEW.temporary_strg_end_date,
+    /*interm_strg_locn               */ NEW.interm_strg_locn,
+    /*declared_userid                */ NEW.declared_userid,
+    /*declared_timestamp             */ NEW.declared_timestamp,
+    /*entry_userid                   */ NEW.entry_userid,
+    /*entry_timestamp                */ NEW.entry_timestamp,
+    /*seed_plan_unit_id              */ NEW.seed_plan_unit_id,
+    /*bgc_zone_code                  */ NEW.bgc_zone_code,
+    /*bgc_zone_description           */ NEW.bgc_zone_description,
+    /*bgc_subzone_code               */ NEW.bgc_subzone_code,
+    /*variant                        */ NEW.variant,
+    /*bec_version_id                 */ NEW.bec_version_id,
+    /*elevation                      */ NEW.elevation,
+    /*latitude_degrees               */ NEW.latitude_degrees,
+    /*latitude_minutes               */ NEW.latitude_minutes,
+    /*latitude_seconds               */ NEW.latitude_seconds,
+    /*longitude_degrees              */ NEW.longitude_degrees,
+    /*longitude_minutes              */ NEW.longitude_minutes,
+    /*longitude_seconds              */ NEW.longitude_seconds,
+    /*collection_elevation           */ NEW.collection_elevation,
+    /*collection_elevation_min       */ NEW.collection_elevation_min,
+    /*collection_elevation_max       */ NEW.collection_elevation_max,
+    /*collection_latitude_deg        */ NEW.collection_latitude_deg,
+    /*collection_latitude_min        */ NEW.collection_latitude_min,
+    /*collection_latitude_sec        */ NEW.collection_latitude_sec,
+    /*collection_latitude_code       */ NEW.collection_latitude_code,
+    /*collection_longitude_deg       */ NEW.collection_longitude_deg,
+    /*collection_longitude_min       */ NEW.collection_longitude_min,
+    /*collection_longitude_sec       */ NEW.collection_longitude_sec,
+    /*collection_longitude_code      */ NEW.collection_longitude_code,
+    /*elevation_min                  */ NEW.elevation_min,
+    /*elevation_max                  */ NEW.elevation_max,
+    /*latitude_deg_min               */ NEW.latitude_deg_min,
+    /*latitude_min_min               */ NEW.latitude_min_min,
+    /*latitude_sec_min               */ NEW.latitude_sec_min,
+    /*latitude_deg_max               */ NEW.latitude_deg_max,
+    /*latitude_min_max               */ NEW.latitude_min_max,
+    /*latitude_sec_max               */ NEW.latitude_sec_max,
+    /*longitude_deg_min              */ NEW.longitude_deg_min,
+    /*longitude_min_min              */ NEW.longitude_min_min,
+    /*longitude_sec_min              */ NEW.longitude_sec_min,
+    /*longitude_deg_max              */ NEW.longitude_deg_max,
+    /*longitude_min_max              */ NEW.longitude_min_max,
+    /*longitude_sec_max              */ NEW.longitude_sec_max,
+    /*smp_mean_bv_growth             */ NEW.smp_mean_bv_growth,
+    /*area_of_use_comment            */ NEW.area_of_use_comment,
+    /*approved_timestamp             */ NEW.approved_timestamp,
+    /*approved_userid                */ NEW.approved_userid,
+    /*mean_geom                      */ NEW.mean_geom,
+    /*update_userid                  */ NEW.update_userid,
+    /*update_timestamp               */ NEW.update_timestamp,
+    /*revision_count                 */ NEW.revision_count
+    );
+        RETURN NEW;
+    elsif (TG_OP = 'DELETE') then
+        v_old_data := ROW(OLD.*);
+    /* insert into spar.logged_actions (schema_name,table_name,user_name,action,original_data,query)
+        values (TG_TABLE_SCHEMA::TEXT,TG_TABLE_NAME::TEXT,session_user::TEXT,substring(TG_OP,1,1),v_old_data, current_query());*/
+    /* AUDIT REVISION number used to order the statements executed in the row */
+    v_auditrevision := (SELECT MAX(COALESCE(audit_revision_version,1))+1 FROM spar.seedlot_audit WHERE seedlot_number = NEW.seedlot_number) ;
+    INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,interm_strg_locn,declared_userid,declared_timestamp,entry_userid,entry_timestamp,seed_plan_unit_id,bgc_zone_code,bgc_subzone_code,variant,bec_version_id,elevation,latitude_degrees,latitude_minutes,latitude_seconds,longitude_degrees,longitude_minutes,longitude_seconds,collection_elevation,collection_elevation_min,collection_elevation_max,collection_latitude_deg,collection_latitude_min,collection_latitude_sec,collection_latitude_code,collection_longitude_deg,collection_longitude_min,collection_longitude_sec,collection_longitude_code,elevation_min,elevation_max,latitude_deg_min,latitude_min_min,latitude_sec_min,latitude_deg_max,latitude_min_max,latitude_sec_max,longitude_deg_min,longitude_min_min,longitude_sec_min,longitude_deg_max,longitude_min_max,longitude_sec_max,smp_mean_bv_growth,area_of_use_comment,approved_timestamp,approved_userid,mean_geom,update_userid,update_timestamp,revision_count)
+    VALUES(
+    /*spar_audit_code                */ 'D',
+    /*db_user                 	     */ session_user::TEXT,
+    /*audit_revision_version  	     */ coalesce(v_auditrevision,1),
+    /*seedlot_number                 */ OLD.seedlot_number,
+    /*seedlot_status_code            */ OLD.seedlot_status_code,
+    /*applicant_client_number        */ OLD.applicant_client_number,
+    /*applicant_locn_code            */ OLD.applicant_locn_code,
+    /*applicant_email_address        */ OLD.applicant_email_address,
+    /*vegetation_code                */ OLD.vegetation_code,
+    /*genetic_class_code             */ OLD.genetic_class_code,
+    /*seedlot_source_code            */ OLD.seedlot_source_code,
+    /*to_be_registrd_ind             */ OLD.to_be_registrd_ind,
+    /*bc_source_ind                  */ OLD.bc_source_ind,
+    /*collection_client_number       */ OLD.collection_client_number,
+    /*collection_locn_code           */ OLD.collection_locn_code,
+    /*collection_start_date          */ OLD.collection_start_date,
+    /*collection_end_date            */ OLD.collection_end_date,
+    /*no_of_containers               */ OLD.no_of_containers,
+    /*vol_per_container              */ OLD.vol_per_container,
+    /*clctn_volume                   */ OLD.clctn_volume,
+    /*seedlot_comment                */ OLD.seedlot_comment,
+    /*interm_strg_client_number      */ OLD.interm_strg_client_number,
+    /*interm_strg_locn_code          */ OLD.interm_strg_locn_code,
+    /*interm_strg_st_date            */ OLD.interm_strg_st_date,
+    /*interm_strg_end_date           */ OLD.interm_strg_end_date,
+    /*interm_facility_code           */ OLD.interm_facility_code,
+    /*female_gametic_mthd_code       */ OLD.female_gametic_mthd_code,
+    /*male_gametic_mthd_code         */ OLD.male_gametic_mthd_code,
+    /*controlled_cross_ind           */ OLD.controlled_cross_ind,
+    /*biotech_processes_ind          */ OLD.biotech_processes_ind,
+    /*pollen_contamination_ind       */ OLD.pollen_contamination_ind,
+    /*pollen_contamination_pct       */ OLD.pollen_contamination_pct,
+    /*contaminant_pollen_bv          */ OLD.contaminant_pollen_bv,
+    /*pollen_contamination_mthd_code */ OLD.pollen_contamination_mthd_code,
+    /*total_parent_trees             */ OLD.total_parent_trees,
+    /*smp_success_pct                */ OLD.smp_success_pct,
+    /*effective_pop_size             */ OLD.effective_pop_size,
+    /*smp_parents_outside            */ OLD.smp_parents_outside,
+    /*non_orchard_pollen_contam_pct  */ OLD.non_orchard_pollen_contam_pct,
+    /*extractory_client_number       */ OLD.extractory_client_number,
+    /*extractory_locn_code           */ OLD.extractory_locn_code,
+    /*extraction_st_date             */ OLD.extraction_st_date,
+    /*extraction_end_date            */ OLD.extraction_end_date,
+    /*temporary_strg_client_number   */ OLD.temporary_strg_client_number,
+    /*temporary_strg_locn_code       */ OLD.temporary_strg_locn_code,
+    /*temporary_strg_start_date      */ OLD.temporary_strg_start_date,
+    /*temporary_strg_end_date        */ OLD.temporary_strg_end_date,
+    /*interm_strg_locn               */ OLD.interm_strg_locn,
+    /*declared_userid                */ OLD.declared_userid,
+    /*declared_timestamp             */ OLD.declared_timestamp,
+    /*entry_userid                   */ OLD.entry_userid,
+    /*entry_timestamp                */ OLD.entry_timestamp,
+	/*seed_plan_unit_id              */ OLD.seed_plan_unit_id,
+    /*bgc_zone_code                  */ OLD.bgc_zone_code,
+    /*bgc_zone_description           */ OLD.bgc_zone_description,
+    /*bgc_subzone_code               */ OLD.bgc_subzone_code,
+    /*variant                        */ OLD.variant,
+    /*bec_version_id                 */ OLD.bec_version_id,
+    /*elevation                      */ OLD.elevation,
+    /*latitude_degrees               */ OLD.latitude_degrees,
+    /*latitude_minutes               */ OLD.latitude_minutes,
+    /*latitude_seconds               */ OLD.latitude_seconds,
+    /*longitude_degrees              */ OLD.longitude_degrees,
+    /*longitude_minutes              */ OLD.longitude_minutes,
+    /*longitude_seconds              */ OLD.longitude_seconds,
+    /*collection_elevation           */ OLD.collection_elevation,
+    /*collection_elevation_min       */ OLD.collection_elevation_min,
+    /*collection_elevation_max       */ OLD.collection_elevation_max,
+    /*collection_latitude_deg        */ OLD.collection_latitude_deg,
+    /*collection_latitude_min        */ OLD.collection_latitude_min,
+    /*collection_latitude_sec        */ OLD.collection_latitude_sec,
+    /*collection_latitude_code       */ OLD.collection_latitude_code,
+    /*collection_longitude_deg       */ OLD.collection_longitude_deg,
+    /*collection_longitude_min       */ OLD.collection_longitude_min,
+    /*collection_longitude_sec       */ OLD.collection_longitude_sec,
+    /*collection_longitude_code      */ OLD.collection_longitude_code,
+    /*elevation_min                  */ OLD.elevation_min,
+    /*elevation_max                  */ OLD.elevation_max,
+    /*latitude_deg_min               */ OLD.latitude_deg_min,
+    /*latitude_min_min               */ OLD.latitude_min_min,
+    /*latitude_sec_min               */ OLD.latitude_sec_min,
+    /*latitude_deg_max               */ OLD.latitude_deg_max,
+    /*latitude_min_max               */ OLD.latitude_min_max,
+    /*latitude_sec_max               */ OLD.latitude_sec_max,
+    /*longitude_deg_min              */ OLD.longitude_deg_min,
+    /*longitude_min_min              */ OLD.longitude_min_min,
+    /*longitude_sec_min              */ OLD.longitude_sec_min,
+    /*longitude_deg_max              */ OLD.longitude_deg_max,
+    /*longitude_min_max              */ OLD.longitude_min_max,
+    /*longitude_sec_max              */ OLD.longitude_sec_max,
+    /*smp_mean_bv_growth             */ OLD.smp_mean_bv_growth,
+    /*area_of_use_comment            */ OLD.area_of_use_comment,
+    /*approved_timestamp             */ OLD.approved_timestamp,
+    /*approved_userid                */ OLD.approved_userid,
+    /*mean_geom                      */ OLD.mean_geom,
+    /*update_userid                  */ OLD.update_userid,
+    /*update_timestamp               */ OLD.update_timestamp,
+    /*revision_count                 */ OLD.revision_count
+    );
+        RETURN OLD;
+    elsif (TG_OP = 'INSERT') then
+        v_new_data := ROW(NEW.*);
+        INSERT INTO spar.seedlot_audit (spar_audit_code,db_user,audit_revision_version,seedlot_number,seedlot_status_code,applicant_client_number,applicant_locn_code,applicant_email_address,vegetation_code,genetic_class_code,seedlot_source_code,to_be_registrd_ind,bc_source_ind,collection_client_number,collection_locn_code,collection_start_date,collection_end_date,no_of_containers,vol_per_container,clctn_volume,seedlot_comment,interm_strg_client_number,interm_strg_locn_code,interm_strg_st_date,interm_strg_end_date,interm_facility_code,female_gametic_mthd_code,male_gametic_mthd_code,controlled_cross_ind,biotech_processes_ind,pollen_contamination_ind,pollen_contamination_pct,contaminant_pollen_bv,pollen_contamination_mthd_code,total_parent_trees,smp_success_pct,effective_pop_size,smp_parents_outside,non_orchard_pollen_contam_pct,extractory_client_number,extractory_locn_code,extraction_st_date,extraction_end_date,temporary_strg_client_number,temporary_strg_locn_code,temporary_strg_start_date,temporary_strg_end_date,interm_strg_locn,declared_userid,declared_timestamp,entry_userid,entry_timestamp,seed_plan_unit_id,bgc_zone_code,bgc_subzone_code,variant,bec_version_id,elevation,latitude_degrees,latitude_minutes,latitude_seconds,longitude_degrees,longitude_minutes,longitude_seconds,collection_elevation,collection_elevation_min,collection_elevation_max,collection_latitude_deg,collection_latitude_min,collection_latitude_sec,collection_latitude_code,collection_longitude_deg,collection_longitude_min,collection_longitude_sec,collection_longitude_code,elevation_min,elevation_max,latitude_deg_min,latitude_min_min,latitude_sec_min,latitude_deg_max,latitude_min_max,latitude_sec_max,longitude_deg_min,longitude_min_min,longitude_sec_min,longitude_deg_max,longitude_min_max,longitude_sec_max,smp_mean_bv_growth,area_of_use_comment,approved_timestamp,approved_userid,mean_geom,update_userid,update_timestamp,revision_count)
+    VALUES(
+    /*spar_audit_code                */ 'I',
+    /*db_user                 	     */ session_user::TEXT,
+    /*audit_revision_version  	     */ 1, -- 1st row version
+    /*seedlot_number                 */ NEW.seedlot_number,
+    /*seedlot_status_code            */ NEW.seedlot_status_code,
+    /*applicant_client_number        */ NEW.applicant_client_number,
+    /*applicant_locn_code            */ NEW.applicant_locn_code,
+    /*applicant_email_address        */ NEW.applicant_email_address,
+    /*vegetation_code                */ NEW.vegetation_code,
+    /*genetic_class_code             */ NEW.genetic_class_code,
+    /*seedlot_source_code            */ NEW.seedlot_source_code,
+    /*to_be_registrd_ind             */ NEW.to_be_registrd_ind,
+    /*bc_source_ind                  */ NEW.bc_source_ind,
+    /*collection_client_number       */ NEW.collection_client_number,
+    /*collection_locn_code           */ NEW.collection_locn_code,
+    /*collection_start_date          */ NEW.collection_start_date,
+    /*collection_end_date            */ NEW.collection_end_date,
+    /*no_of_containers               */ NEW.no_of_containers,
+    /*vol_per_container              */ NEW.vol_per_container,
+    /*clctn_volume                   */ NEW.clctn_volume,
+    /*seedlot_comment                */ NEW.seedlot_comment,
+    /*interm_strg_client_number      */ NEW.interm_strg_client_number,
+    /*interm_strg_locn_code          */ NEW.interm_strg_locn_code,
+    /*interm_strg_st_date            */ NEW.interm_strg_st_date,
+    /*interm_strg_end_date           */ NEW.interm_strg_end_date,
+    /*interm_facility_code           */ NEW.interm_facility_code,
+    /*female_gametic_mthd_code       */ NEW.female_gametic_mthd_code,
+    /*male_gametic_mthd_code         */ NEW.male_gametic_mthd_code,
+    /*controlled_cross_ind           */ NEW.controlled_cross_ind,
+    /*biotech_processes_ind          */ NEW.biotech_processes_ind,
+    /*pollen_contamination_ind       */ NEW.pollen_contamination_ind,
+    /*pollen_contamination_pct       */ NEW.pollen_contamination_pct,
+    /*contaminant_pollen_bv          */ NEW.contaminant_pollen_bv,
+    /*pollen_contamination_mthd_code */ NEW.pollen_contamination_mthd_code,
+    /*total_parent_trees             */ NEW.total_parent_trees,
+    /*smp_success_pct                */ NEW.smp_success_pct,
+    /*effective_pop_size             */ NEW.effective_pop_size,
+    /*smp_parents_outside            */ NEW.smp_parents_outside,
+    /*non_orchard_pollen_contam_pct  */ NEW.non_orchard_pollen_contam_pct,
+    /*extractory_client_number       */ NEW.extractory_client_number,
+    /*extractory_locn_code           */ NEW.extractory_locn_code,
+    /*extraction_st_date             */ NEW.extraction_st_date,
+    /*extraction_end_date            */ NEW.extraction_end_date,
+    /*temporary_strg_client_number   */ NEW.temporary_strg_client_number,
+    /*temporary_strg_locn_code       */ NEW.temporary_strg_locn_code,
+    /*temporary_strg_start_date      */ NEW.temporary_strg_start_date,
+    /*temporary_strg_end_date        */ NEW.temporary_strg_end_date,
+    /*interm_strg_locn               */ NEW.interm_strg_locn,
+    /*declared_userid                */ NEW.declared_userid,
+    /*declared_timestamp             */ NEW.declared_timestamp,
+    /*entry_userid                   */ NEW.entry_userid,
+    /*entry_timestamp                */ NEW.entry_timestamp,
+	/*seed_plan_unit_id              */ NEW.seed_plan_unit_id,
+    /*bgc_zone_code                  */ NEW.bgc_zone_code,
+    /*bgc_zone_description           */ NEW.bgc_zone_description,
+    /*bgc_subzone_code               */ NEW.bgc_subzone_code,
+    /*variant                        */ NEW.variant,
+    /*bec_version_id                 */ NEW.bec_version_id,
+    /*elevation                      */ NEW.elevation,
+    /*latitude_degrees               */ NEW.latitude_degrees,
+    /*latitude_minutes               */ NEW.latitude_minutes,
+    /*latitude_seconds               */ NEW.latitude_seconds,
+    /*longitude_degrees              */ NEW.longitude_degrees,
+    /*longitude_minutes              */ NEW.longitude_minutes,
+    /*longitude_seconds              */ NEW.longitude_seconds,
+    /*collection_elevation           */ NEW.collection_elevation,
+    /*collection_elevation_min       */ NEW.collection_elevation_min,
+    /*collection_elevation_max       */ NEW.collection_elevation_max,
+    /*collection_latitude_deg        */ NEW.collection_latitude_deg,
+    /*collection_latitude_min        */ NEW.collection_latitude_min,
+    /*collection_latitude_sec        */ NEW.collection_latitude_sec,
+    /*collection_latitude_code       */ NEW.collection_latitude_code,
+    /*collection_longitude_deg       */ NEW.collection_longitude_deg,
+    /*collection_longitude_min       */ NEW.collection_longitude_min,
+    /*collection_longitude_sec       */ NEW.collection_longitude_sec,
+    /*collection_longitude_code      */ NEW.collection_longitude_code,
+    /*elevation_min                  */ NEW.elevation_min,
+    /*elevation_max                  */ NEW.elevation_max,
+    /*latitude_deg_min               */ NEW.latitude_deg_min,
+    /*latitude_min_min               */ NEW.latitude_min_min,
+    /*latitude_sec_min               */ NEW.latitude_sec_min,
+    /*latitude_deg_max               */ NEW.latitude_deg_max,
+    /*latitude_min_max               */ NEW.latitude_min_max,
+    /*latitude_sec_max               */ NEW.latitude_sec_max,
+    /*longitude_deg_min              */ NEW.longitude_deg_min,
+    /*longitude_min_min              */ NEW.longitude_min_min,
+    /*longitude_sec_min              */ NEW.longitude_sec_min,
+    /*longitude_deg_max              */ NEW.longitude_deg_max,
+    /*longitude_min_max              */ NEW.longitude_min_max,
+    /*longitude_sec_max              */ NEW.longitude_sec_max,
+    /*smp_mean_bv_growth             */ NEW.smp_mean_bv_growth,
+    /*area_of_use_comment            */ NEW.area_of_use_comment,
+    /*approved_timestamp             */ NEW.approved_timestamp,
+    /*approved_userid                */ NEW.approved_userid,
+    /*mean_geom                      */ NEW.mean_geom,
+    /*update_userid                  */ NEW.update_userid,
+    /*update_timestamp               */ NEW.update_timestamp,
+    /*revision_count                 */ NEW.revision_count
+    );
+        RETURN NEW;
+    else
+        RAISE WARNING '[AUDIT.IF_MODIFIED_FUNC] - Other action occurred: %, at %',TG_OP,now();
+        RETURN NULL;
+    end if;
+
+EXCEPTION
+    WHEN data_exception then
+        --insert into spar.error_catch (erro) VALUES(CONCAT('DATA EXCEPTION ',SQLERRM));
+        RAISE WARNING '[AUDIT.IF_MODIFIED_FUNC] - UDF ERROR [DATA EXCEPTION] - SQLSTATE: %, SQLERRM: %',SQLSTATE,SQLERRM;
+        RETURN NULL;
+    WHEN unique_violation then
+      --insert into spar.error_catch (erro) VALUES(CONCAT('UNIQUE EXCEPTION ',SQLERRM));
+        RAISE WARNING '[AUDIT.IF_MODIFIED_FUNC] - UDF ERROR [UNIQUE] - SQLSTATE: %, SQLERRM: %',SQLSTATE,SQLERRM;
+        RETURN NULL;
+    WHEN others then
+        --insert into spar.error_catch (erro) VALUES(CONCAT(v_auditrevision, CONCAT('OTHER EXCEPTION ',SQLERRM)));
+        RAISE WARNING '[AUDIT.IF_MODIFIED_FUNC] - UDF ERROR [OTHER] - SQLSTATE: %, SQLERRM: %',SQLSTATE,SQLERRM;
+        RETURN NULL;
+END;]]></definition>
+         <parameters>
+            <parameter mode="IN"/>
+         </parameters>
+      </routine>
+   </routines>
+</database>
